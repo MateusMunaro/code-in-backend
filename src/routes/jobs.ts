@@ -228,7 +228,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
 
   // Get a specific documentation file content
   .get(
-    "/:jobId/docs/*",
+    "/:jobId/files/*",
     async ({ params, set }) => {
       const { jobId } = params;
       // Extract the file path from the wildcard
