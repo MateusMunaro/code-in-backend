@@ -48,13 +48,26 @@ export interface CodeEmbedding {
   created_at: string;
 }
 
+// Documentation file metadata stored in JSONB
+export interface DocumentationFile {
+  path: string;
+  storage_path: string;
+  size: number;
+  content_type: string;
+}
+
 export interface AnalysisResult {
   id: string;
   job_id: string;
   documentation: string;
+  documentation_files: DocumentationFile[];
+  storage_path: string | null;
   patterns: string[];
   architecture_type: string;
   confidence_score: number;
+  agent_reasoning: Record<string, unknown>[];
+  dependencies_graph: Record<string, unknown>;
+  suggested_improvements: Record<string, unknown>[];
   created_at: string;
 }
 
@@ -180,4 +193,133 @@ export async function searchCodeEmbeddings(
   }
 
   return data || [];
+}
+
+// =============================================
+// Storage Functions for Documentation Files
+// =============================================
+
+const DOCUMENTATION_BUCKET = "documentation";
+
+/**
+ * Get public URL for a documentation file
+ */
+export function getDocumentationPublicUrl(storagePath: string): string {
+  const { data } = supabaseAdmin.storage
+    .from(DOCUMENTATION_BUCKET)
+    .getPublicUrl(storagePath);
+  
+  return data.publicUrl;
+}
+
+/**
+ * Get signed URL for a documentation file (with expiration)
+ */
+export async function getDocumentationSignedUrl(
+  storagePath: string,
+  expiresIn = 3600 // 1 hour default
+): Promise<string | null> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(DOCUMENTATION_BUCKET)
+    .createSignedUrl(storagePath, expiresIn);
+  
+  if (error) {
+    console.error("Error creating signed URL:", error);
+    return null;
+  }
+  
+  return data.signedUrl;
+}
+
+/**
+ * Download documentation file content
+ */
+export async function getDocumentationFileContent(
+  storagePath: string
+): Promise<string | null> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(DOCUMENTATION_BUCKET)
+    .download(storagePath);
+  
+  if (error) {
+    console.error("Error downloading file:", error);
+    return null;
+  }
+  
+  return await data.text();
+}
+
+/**
+ * List all documentation files for a job
+ */
+export async function listDocumentationFiles(
+  jobId: string
+): Promise<{ name: string; size: number }[]> {
+  const { data, error } = await supabaseAdmin.storage
+    .from(DOCUMENTATION_BUCKET)
+    .list(jobId, {
+      sortBy: { column: "name", order: "asc" },
+    });
+  
+  if (error) {
+    console.error("Error listing files:", error);
+    return [];
+  }
+  
+  // Flatten nested folders
+  const files: { name: string; size: number }[] = [];
+  
+  const listRecursive = async (prefix: string) => {
+    const { data: items } = await supabaseAdmin.storage
+      .from(DOCUMENTATION_BUCKET)
+      .list(prefix);
+    
+    if (items) {
+      for (const item of items) {
+        const fullPath = prefix ? `${prefix}/${item.name}` : item.name;
+        if (item.id) {
+          // It's a file
+          files.push({ name: fullPath, size: item.metadata?.size || 0 });
+        } else {
+          // It's a folder, recurse
+          await listRecursive(fullPath);
+        }
+      }
+    }
+  };
+  
+  await listRecursive(jobId);
+  return files;
+}
+
+/**
+ * Get analysis with documentation file URLs
+ */
+export async function getJobDocumentation(jobId: string): Promise<{
+  analysis: AnalysisResult | null;
+  files: Array<{
+    path: string;
+    url: string;
+    size: number;
+  }>;
+} | null> {
+  // Get analysis result
+  const { data: analysis, error } = await supabaseAdmin
+    .from("analysis_results")
+    .select("*")
+    .eq("job_id", jobId)
+    .single();
+  
+  if (error || !analysis) {
+    return null;
+  }
+  
+  // Build file list with URLs
+  const files = (analysis.documentation_files || []).map((file: DocumentationFile) => ({
+    path: file.path,
+    url: getDocumentationPublicUrl(file.storage_path),
+    size: file.size,
+  }));
+  
+  return { analysis, files };
 }

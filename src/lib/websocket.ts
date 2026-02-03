@@ -1,11 +1,15 @@
 import { Elysia, t } from "elysia";
-import { subscribeToStatus, subscribeToComplete, StatusMessage, CompleteMessage } from "./redis";
+import { subscribeToStatus, subscribeToComplete } from "./redis";
+import type { StatusMessage, CompleteMessage } from "./redis";
+
+// Use 'any' for WebSocket since Elysia uses ServerWebSocket which is different from standard WebSocket
+type WS = any;
 
 // Store WebSocket connections by job ID
-const jobSubscriptions = new Map<string, Set<WebSocket>>();
+const jobSubscriptions = new Map<string, Set<WS>>();
 
 // Store all active connections for broadcast
-const allConnections = new Set<WebSocket>();
+const allConnections = new Set<WS>();
 
 // WebSocket message types
 interface WSMessage {
@@ -21,9 +25,9 @@ interface WSOutgoingMessage {
 }
 
 // Send message to specific WebSocket
-function sendMessage(ws: WebSocket, message: WSOutgoingMessage): void {
+function sendMessage(ws: WS, message: WSOutgoingMessage): void {
   try {
-    if (ws.readyState === WebSocket.OPEN) {
+    if (ws.readyState === 1) { // WebSocket.OPEN = 1
       ws.send(JSON.stringify(message));
     }
   } catch (error) {
@@ -58,7 +62,7 @@ function handleCompleteUpdate(complete: CompleteMessage): void {
 }
 
 // Subscribe a WebSocket to a job
-function subscribeToJob(ws: WebSocket, jobId: string): void {
+function subscribeToJob(ws: WS, jobId: string): void {
   if (!jobSubscriptions.has(jobId)) {
     jobSubscriptions.set(jobId, new Set());
   }
@@ -67,7 +71,7 @@ function subscribeToJob(ws: WebSocket, jobId: string): void {
 }
 
 // Unsubscribe a WebSocket from a job
-function unsubscribeFromJob(ws: WebSocket, jobId: string): void {
+function unsubscribeFromJob(ws: WS, jobId: string): void {
   const subscribers = jobSubscriptions.get(jobId);
   if (subscribers) {
     subscribers.delete(ws);
@@ -78,7 +82,7 @@ function unsubscribeFromJob(ws: WebSocket, jobId: string): void {
 }
 
 // Clean up WebSocket from all subscriptions
-function cleanupConnection(ws: WebSocket): void {
+function cleanupConnection(ws: WS): void {
   allConnections.delete(ws);
   jobSubscriptions.forEach((subscribers, jobId) => {
     subscribers.delete(ws);
@@ -130,10 +134,6 @@ export const websocketPlugin = new Elysia()
     close(ws) {
       cleanupConnection(ws.raw);
       console.log(`🔌 WebSocket disconnected. Total connections: ${allConnections.size}`);
-    },
-    error(ws, error) {
-      console.error("WebSocket error:", error);
-      cleanupConnection(ws.raw);
     },
   });
 

@@ -1,5 +1,13 @@
 import { Elysia, t } from "elysia";
-import { getJob, getJobWithAnalysis, listJobs, updateJobStatus } from "../lib/supabase";
+import { 
+  getJob, 
+  getJobWithAnalysis, 
+  listJobs, 
+  updateJobStatus,
+  getJobDocumentation,
+  getDocumentationFileContent,
+  getDocumentationPublicUrl,
+} from "../lib/supabase";
 import { isValidModel } from "../lib/models";
 
 export const jobsRoutes = new Elysia({ prefix: "/jobs" })
@@ -177,6 +185,81 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
           job_id: jobId,
           status: "failed",
           message: "Job cancelled successfully",
+        },
+      };
+    },
+    {
+      params: t.Object({
+        jobId: t.String(),
+      }),
+    }
+  )
+
+  // Get documentation files for a job
+  .get(
+    "/:jobId/docs",
+    async ({ params, set }) => {
+      const { jobId } = params;
+      const result = await getJobDocumentation(jobId);
+
+      if (!result) {
+        set.status = 404;
+        return {
+          success: false,
+          error: "Documentation not found",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          files: result.files,
+          storage_path: result.analysis?.storage_path,
+          total_files: result.files.length,
+        },
+      };
+    },
+    {
+      params: t.Object({
+        jobId: t.String(),
+      }),
+    }
+  )
+
+  // Get a specific documentation file content
+  .get(
+    "/:jobId/docs/*",
+    async ({ params, set }) => {
+      const { jobId } = params;
+      // Extract the file path from the wildcard
+      const filePath = (params as Record<string, string>)["*"] || "";
+      
+      if (!filePath) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "File path is required",
+        };
+      }
+
+      // Build the storage path
+      const storagePath = `${jobId}/${filePath}`;
+      const content = await getDocumentationFileContent(storagePath);
+
+      if (content === null) {
+        set.status = 404;
+        return {
+          success: false,
+          error: "File not found",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          path: filePath,
+          content: content,
+          url: getDocumentationPublicUrl(storagePath),
         },
       };
     },

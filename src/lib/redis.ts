@@ -1,4 +1,4 @@
-import { createClient, RedisClientType } from "redis";
+import { createClient, type RedisClientType } from "redis";
 
 // Environment variables - configure in .env
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
