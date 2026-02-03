@@ -42,7 +42,7 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
     connections: getConnectionStats(),
   }))
-  .listen(3333);
+  .listen(process.env.PORT || 3333);
 
 // Initialize services after server starts
 initializeServices();
