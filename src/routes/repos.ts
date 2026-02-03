@@ -29,7 +29,7 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
   .post(
     "/",
     async ({ body, set }) => {
-      const { repo_url, model_id } = body;
+      const { repo_url, model_id, github_token } = body;
 
       // Validate URL
       if (!isValidRepoUrl(repo_url)) {
@@ -43,8 +43,8 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
       // Validate model
       const selectedModel = model_id && isValidModel(model_id) ? model_id : getDefaultModel().id;
 
-      // Create job in Supabase
-      const job = await createJob(repo_url, selectedModel);
+      // Create job in Supabase (with github_token for PR creation)
+      const job = await createJob(repo_url, selectedModel, github_token);
       if (!job) {
         set.status = 500;
         return {
@@ -56,12 +56,13 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
       // Update status to processing
       await updateJobStatus(job.id, "processing");
 
-      // Publish to Redis queue
+      // Publish to Redis queue (include github_token for agent)
       try {
         await pushJobToQueue({
           job_id: job.id,
           repo_url: repo_url,
           selected_model: selectedModel,
+          github_token: github_token || null,
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
@@ -90,6 +91,7 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
       body: t.Object({
         repo_url: t.String({ minLength: 1 }),
         model_id: t.Optional(t.String()),
+        github_token: t.Optional(t.String()),
       }),
     }
   )

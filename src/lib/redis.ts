@@ -60,6 +60,7 @@ export interface JobMessage {
   job_id: string;
   repo_url: string;
   selected_model: string;
+  github_token?: string | null;
   timestamp: string;
 }
 

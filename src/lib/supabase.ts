@@ -25,6 +25,7 @@ export interface Job {
   selected_model: string;
   result: Record<string, unknown> | null;
   error_message: string | null;
+  github_token: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,13 +69,19 @@ export interface AnalysisResult {
   agent_reasoning: Record<string, unknown>[];
   dependencies_graph: Record<string, unknown>;
   suggested_improvements: Record<string, unknown>[];
+  pr_url: string | null;
+  pr_number: number | null;
+  pr_branch: string | null;
+  pr_status: "none" | "created" | "merged" | "closed" | "failed";
+  pr_created_at: string | null;
   created_at: string;
 }
 
 // Helper functions
 export async function createJob(
   repoUrl: string,
-  selectedModel: string
+  selectedModel: string,
+  githubToken?: string
 ): Promise<Job | null> {
   const { data, error } = await supabaseAdmin
     .from("jobs")
@@ -82,6 +89,7 @@ export async function createJob(
       repo_url: repoUrl,
       status: "pending",
       selected_model: selectedModel,
+      github_token: githubToken || null,
     })
     .select()
     .single();
