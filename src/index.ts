@@ -5,6 +5,8 @@ import { websocketPlugin, initWebSocketRedisRelay, getConnectionStats } from "./
 import { reposRoutes } from "./routes/repos";
 import { jobsRoutes } from "./routes/jobs";
 import { modelsRoutes } from "./routes/models";
+import { mcpRoutes } from "./routes/mcp";
+
 
 // Initialize services
 async function initializeServices() {
@@ -31,6 +33,8 @@ const app = new Elysia()
   .use(reposRoutes)
   .use(jobsRoutes)
   .use(modelsRoutes)
+  .use(mcpRoutes)
+
   // Health check endpoints
   .get("/", () => ({
     name: "Code Indexer AI Agent API",

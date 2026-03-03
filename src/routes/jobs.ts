@@ -262,11 +262,6 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
           url: getDocumentationPublicUrl(storagePath),
         },
       };
-    },
-    {
-      params: t.Object({
-        jobId: t.String(),
-        "*": t.String(),
-      }),
     }
+    // Note: Skipping params validation for wildcard route to avoid Elysia TypeBox issue
   );

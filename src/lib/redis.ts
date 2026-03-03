@@ -12,6 +12,7 @@ export const CHANNELS = {
   JOB_QUEUE: "code-indexer:jobs",
   JOB_STATUS: "code-indexer:status",
   JOB_COMPLETE: "code-indexer:complete",
+  MCP_JOBS: "code-indexer:mcp-jobs",
 } as const;
 
 // Initialize Redis connection

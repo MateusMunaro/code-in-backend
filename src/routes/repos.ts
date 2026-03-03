@@ -31,6 +31,9 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
     async ({ body, set }) => {
       const { repo_url, model_id, github_token } = body;
 
+      // Debug log
+      console.log(`[repos] Creating job - GitHub token: ${github_token ? '✓ provided' : '✗ not provided'}`);
+
       // Validate URL
       if (!isValidRepoUrl(repo_url)) {
         set.status = 400;
