@@ -7,16 +7,19 @@ import {
   getJobDocumentation,
   getDocumentationFileContent,
   getDocumentationPublicUrl,
+  supabaseAdmin,
 } from "../lib/supabase";
 import { isValidModel } from "../lib/models";
+import { authPlugin } from "../lib/auth";
 
 export const jobsRoutes = new Elysia({ prefix: "/jobs" })
+  .use(authPlugin)
   // Get all jobs with pagination
   .get(
     "/",
-    async ({ query }) => {
+    async ({ query, userId }) => {
       const limit = query.limit ? parseInt(query.limit) : 50;
-      const jobs = await listJobs(limit);
+      const jobs = await listJobs(limit, userId!);
 
       return {
         success: true,
@@ -34,9 +37,9 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Get a specific job by ID
   .get(
     "/:jobId",
-    async ({ params, set }) => {
+    async ({ params, userId, set }) => {
       const { jobId } = params;
-      const job = await getJob(jobId);
+      const job = await getJob(jobId, userId!);
 
       if (!job) {
         set.status = 404;
@@ -61,9 +64,9 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Get job with full analysis result
   .get(
     "/:jobId/analysis",
-    async ({ params, set }) => {
+    async ({ params, userId, set }) => {
       const { jobId } = params;
-      const result = await getJobWithAnalysis(jobId);
+      const result = await getJobWithAnalysis(jobId, userId!);
 
       if (!result) {
         set.status = 404;
@@ -88,7 +91,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Update job's selected model (only if pending or failed)
   .patch(
     "/:jobId/model",
-    async ({ params, body, set }) => {
+    async ({ params, body, userId, set }) => {
       const { jobId } = params;
       const { model_id } = body;
 
@@ -101,7 +104,7 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
         };
       }
 
-      const job = await getJob(jobId);
+      const job = await getJob(jobId, userId!);
       if (!job) {
         set.status = 404;
         return {
@@ -120,7 +123,6 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
       }
 
       // Update the model in Supabase
-      const { supabaseAdmin } = await import("../lib/supabase");
       const { error } = await supabaseAdmin
         .from("jobs")
         .update({ selected_model: model_id })
@@ -156,9 +158,9 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Cancel a job (only if pending or processing)
   .delete(
     "/:jobId",
-    async ({ params, set }) => {
+    async ({ params, userId, set }) => {
       const { jobId } = params;
-      const job = await getJob(jobId);
+      const job = await getJob(jobId, userId!);
 
       if (!job) {
         set.status = 404;
@@ -198,8 +200,16 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Get documentation files for a job
   .get(
     "/:jobId/docs",
-    async ({ params, set }) => {
+    async ({ params, userId, set }) => {
       const { jobId } = params;
+
+      // Verify ownership before fetching documentation
+      const ownerCheck = await getJob(jobId, userId!);
+      if (!ownerCheck) {
+        set.status = 404;
+        return { success: false, error: "Job not found" };
+      }
+
       const result = await getJobDocumentation(jobId);
 
       if (!result) {
@@ -229,8 +239,16 @@ export const jobsRoutes = new Elysia({ prefix: "/jobs" })
   // Get a specific documentation file content
   .get(
     "/:jobId/files/*",
-    async ({ params, set }) => {
+    async ({ params, userId, set }) => {
       const { jobId } = params;
+
+      // Verify ownership before serving file content
+      const ownerCheck = await getJob(jobId, userId!);
+      if (!ownerCheck) {
+        set.status = 404;
+        return { success: false, error: "Job not found" };
+      }
+
       // Extract the file path from the wildcard
       const filePath = (params as Record<string, string>)["*"] || "";
       

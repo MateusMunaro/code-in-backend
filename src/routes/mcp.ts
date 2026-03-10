@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
-import { createJob, getJob, updateJobStatus } from "../lib/supabase";
-import { pushJobToQueue, CHANNELS } from "../lib/redis";
+import { type AnalysisResult, createJob, getJob, getJobWithAnalysis, updateJobStatus } from "../lib/supabase";
+import { CHANNELS } from "../lib/redis";
 import { getDefaultModel } from "../lib/models";
 import {
     McpPayloadSchema,
@@ -8,8 +8,29 @@ import {
     getMcpJobStatus,
     type McpJobMessage,
 } from "../lib/mcp";
+import { authPlugin } from "../lib/auth";
+
+function buildMcpAnalysisResult(analysis: AnalysisResult) {
+    return {
+        documentation: analysis.documentation,
+        documentation_files: analysis.documentation_files,
+        storage_path: analysis.storage_path,
+        patterns: analysis.patterns,
+        architecture_type: analysis.architecture_type,
+        confidence_score: analysis.confidence_score,
+        reasoning_steps: analysis.agent_reasoning,
+        dependencies_graph: analysis.dependencies_graph,
+        suggested_improvements: analysis.suggested_improvements,
+        pr_url: analysis.pr_url,
+        pr_number: analysis.pr_number,
+        pr_branch: analysis.pr_branch,
+        pr_status: analysis.pr_status,
+        created_at: analysis.created_at,
+    };
+}
 
 export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
+    .use(authPlugin)
 
     // ─────────────────────────────────────────────
     // POST /api/mcp/analyze
@@ -18,7 +39,7 @@ export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
     // ─────────────────────────────────────────────
     .post(
         "/analyze",
-        async ({ body, set }) => {
+        async ({ body, userId, set }) => {
             // 1. Strict Zod validation
             const parsed = McpPayloadSchema.safeParse(body);
 
@@ -46,7 +67,7 @@ export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
 
             // 3. Create job in Supabase
             const defaultModel = getDefaultModel();
-            const job = await createJob(repoUrl, defaultModel.id);
+            const job = await createJob(repoUrl, defaultModel.id, userId!);
 
             if (!job) {
                 set.status = 500;
@@ -117,8 +138,18 @@ export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
     // ─────────────────────────────────────────────
     .get(
         "/status/:jobId",
-        async ({ params, set }) => {
+        async ({ params, userId, set }) => {
             const { jobId } = params;
+
+            // Verify ownership — ensures users can only poll their own jobs
+            const job = await getJob(jobId, userId!);
+            if (!job) {
+                set.status = 404;
+                return {
+                    success: false,
+                    error: "Job not found",
+                };
+            }
 
             // 1. Try Redis first (fast path)
             try {
@@ -133,16 +164,11 @@ export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
                 console.error("Redis lookup failed, falling back to Supabase:", error);
             }
 
-            // 2. Fallback to Supabase
-            const job = await getJob(jobId);
-
-            if (!job) {
-                set.status = 404;
-                return {
-                    success: false,
-                    error: "Job not found",
-                };
-            }
+            // 2. Fallback to Supabase (job already fetched for ownership check above)
+            const analysisResult =
+                job.status === "completed"
+                    ? await getJobWithAnalysis(jobId, userId!)
+                    : null;
 
             // Map Supabase status to MCP polling response
             const statusMap: Record<string, "PENDING" | "COMPLETED" | "FAILED"> = {
@@ -156,8 +182,10 @@ export const mcpRoutes = new Elysia({ prefix: "/api/mcp" })
                 success: true,
                 data: {
                     status: statusMap[job.status] || "PENDING",
-                    ...(job.status === "completed" && job.result
-                        ? { result: JSON.stringify(job.result) }
+                    ...(job.status === "completed" && analysisResult?.analysis
+                        ? { result: buildMcpAnalysisResult(analysisResult.analysis) }
+                        : job.status === "completed" && job.result
+                        ? { result: job.result }
                         : {}),
                     ...(job.status === "failed" && job.error_message
                         ? { error: job.error_message }

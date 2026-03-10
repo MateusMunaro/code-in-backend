@@ -1,7 +1,8 @@
 import { Elysia, t } from "elysia";
-import { createJob, updateJobStatus } from "../lib/supabase";
+import { createJob, updateJobStatus, getJob } from "../lib/supabase";
 import { publishJob, pushJobToQueue } from "../lib/redis";
 import { isValidModel, getDefaultModel } from "../lib/models";
+import { authPlugin } from "../lib/auth";
 
 // Validate GitHub/GitLab URL
 function isValidRepoUrl(url: string): boolean {
@@ -25,10 +26,11 @@ function extractRepoName(url: string): string {
 }
 
 export const reposRoutes = new Elysia({ prefix: "/repos" })
+  .use(authPlugin)
   // Submit a new repository for analysis
   .post(
     "/",
-    async ({ body, set }) => {
+    async ({ body, userId, set }) => {
       const { repo_url, model_id, github_token } = body;
 
       // Debug log
@@ -47,7 +49,7 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
       const selectedModel = model_id && isValidModel(model_id) ? model_id : getDefaultModel().id;
 
       // Create job in Supabase (with github_token for PR creation)
-      const job = await createJob(repo_url, selectedModel, github_token);
+      const job = await createJob(repo_url, selectedModel, userId!, github_token);
       if (!job) {
         set.status = 500;
         return {
@@ -102,14 +104,11 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
   // Retry a failed job
   .post(
     "/:jobId/retry",
-    async ({ params, body, set }) => {
+    async ({ params, body, userId, set }) => {
       const { jobId } = params;
       const { model_id } = body || {};
 
-      // Import getJob dynamically to avoid circular dependency
-      const { getJob } = await import("../lib/supabase");
-      
-      const job = await getJob(jobId);
+      const job = await getJob(jobId, userId!);
       if (!job) {
         set.status = 404;
         return {

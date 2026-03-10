@@ -99,7 +99,7 @@ const MCP_RESULT_TTL = 3600; // 1 hour
 
 export interface McpJobStatus {
   status: "PENDING" | "COMPLETED" | "FAILED";
-  result?: string;
+  result?: unknown;
   error?: string;
 }
 
@@ -115,7 +115,7 @@ export async function setMcpJobPending(jobId: string): Promise<void> {
 }
 
 /** Store the completed result for a job */
-export async function setMcpJobResult(jobId: string, result: string): Promise<void> {
+export async function setMcpJobResult(jobId: string, result: unknown): Promise<void> {
   const publisher = getPublisher();
   const value: McpJobStatus = { status: "COMPLETED", result };
   await publisher.set(

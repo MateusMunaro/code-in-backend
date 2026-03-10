@@ -29,11 +29,17 @@ const app = new Elysia()
   .use(cors())
   // WebSocket for real-time updates
   .use(websocketPlugin)
-  // API Routes
-  .use(reposRoutes)
-  .use(jobsRoutes)
-  .use(modelsRoutes)
-  .use(mcpRoutes)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Protected routes — each plugin internally applies authPlugin, which
+  // validates the `Authorization: Bearer <token>` header via Supabase JWT.
+  // ─────────────────────────────────────────────────────────────────────────
+  .use(reposRoutes)   // POST /repos, POST /repos/:jobId/retry
+  .use(jobsRoutes)    // GET|PATCH|DELETE /jobs, GET /jobs/:jobId/...
+  .use(mcpRoutes)     // POST /api/mcp/analyze, GET /api/mcp/status/:jobId
+  // ─────────────────────────────────────────────────────────────────────────
+  // Public routes — no auth required
+  // ─────────────────────────────────────────────────────────────────────────
+  .use(modelsRoutes)  // GET /models
 
   // Health check endpoints
   .get("/", () => ({

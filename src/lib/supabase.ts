@@ -26,6 +26,7 @@ export interface Job {
   result: Record<string, unknown> | null;
   error_message: string | null;
   github_token: string | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +82,7 @@ export interface AnalysisResult {
 export async function createJob(
   repoUrl: string,
   selectedModel: string,
+  userId?: string | null,
   githubToken?: string
 ): Promise<Job | null> {
   const { data, error } = await supabaseAdmin
@@ -90,6 +92,7 @@ export async function createJob(
       status: "pending",
       selected_model: selectedModel,
       github_token: githubToken || null,
+      user_id: userId || null,
     })
     .select()
     .single();
@@ -129,12 +132,18 @@ export async function updateJobStatus(
   return true;
 }
 
-export async function getJob(jobId: string): Promise<Job | null> {
-  const { data, error } = await supabaseAdmin
+export async function getJob(jobId: string, userId?: string): Promise<Job | null> {
+  let query = supabaseAdmin
     .from("jobs")
     .select("*")
-    .eq("id", jobId)
-    .single();
+    .eq("id", jobId);
+
+  // Enforce ownership when userId is provided (defence-in-depth on top of RLS)
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) {
     console.error("Error fetching job:", error);
@@ -144,15 +153,20 @@ export async function getJob(jobId: string): Promise<Job | null> {
   return data;
 }
 
-export async function getJobWithAnalysis(jobId: string): Promise<{
+export async function getJobWithAnalysis(jobId: string, userId?: string): Promise<{
   job: Job;
   analysis: AnalysisResult | null;
 } | null> {
-  const { data: job, error: jobError } = await supabaseAdmin
+  let query = supabaseAdmin
     .from("jobs")
     .select("*")
-    .eq("id", jobId)
-    .single();
+    .eq("id", jobId);
+
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data: job, error: jobError } = await query.single();
 
   if (jobError || !job) {
     console.error("Error fetching job:", jobError);
@@ -168,12 +182,19 @@ export async function getJobWithAnalysis(jobId: string): Promise<{
   return { job, analysis };
 }
 
-export async function listJobs(limit = 50): Promise<Job[]> {
-  const { data, error } = await supabaseAdmin
+export async function listJobs(limit = 50, userId?: string): Promise<Job[]> {
+  let query = supabaseAdmin
     .from("jobs")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
+
+  // Filter by owner when userId is provided (defence-in-depth on top of RLS)
+  if (userId) {
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error listing jobs:", error);
