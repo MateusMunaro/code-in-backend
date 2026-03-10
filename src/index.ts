@@ -6,6 +6,7 @@ import { reposRoutes } from "./routes/repos";
 import { jobsRoutes } from "./routes/jobs";
 import { modelsRoutes } from "./routes/models";
 import { mcpRoutes } from "./routes/mcp";
+import { cliAuthRoutes } from "./routes/cliAuth";
 
 
 // Initialize services
@@ -29,6 +30,7 @@ const app = new Elysia()
   .use(cors())
   // WebSocket for real-time updates
   .use(websocketPlugin)
+  .use(cliAuthRoutes)
   // ─────────────────────────────────────────────────────────────────────────
   // Protected routes — each plugin internally applies authPlugin, which
   // validates the `Authorization: Bearer <token>` header via Supabase JWT.
