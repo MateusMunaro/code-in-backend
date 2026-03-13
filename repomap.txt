@@ -1,0 +1,106 @@
+# repomap.txt — d84415fd-b97f-44d6-af30-eb8a2e5652f3
+# AST-compressed repository map (symbols only, no bodies)
+# Generated: 2026-03-13
+# Language: TypeScript
+#
+
+# Stats: 12 files, 50 functions, 0 classes
+#
+
+
+src/
+  ├── index.ts  (79L)
+  │   async def initializeServices()
+
+src/lib/
+  ├── auth.ts  (49L)
+  ├── mcp.ts  (151L)
+  │   async def cpJobPending(job(d: string): P) -> omise<void> {
+  │   async def cpJobResult(job(d: string, re, lt: unknown): P) -> omise<void> {
+  │   async def cpJobFailed(job(d: string, er, r: string): P) -> omise<void> {
+  │   async def cpJobStatus(job(d: string): P) -> omise<McpJobStatus | null> {
+  ├── models.ts  (96L)
+  │   def elId: string(: LLMModel | un) -> efined {
+  return AVAI
+  │   def der(provider: LLMMo(el["provider"]): LLMModel[] {
+) -> return AVAI
+  │   def : LLMModel[] {() -> return AVAI
+  │   def : LLMModel[] {() -> return AVAI
+  │   def elId: string(: boolean {
+  r) -> turn AVAI
+  │   def ): LLMModel {
+ () -> eturn AVAI
+  ├── redis.ts  (144L)
+  │   async def initRedis() -> Promise<void>
+  │   def ublisher(): () -> disClientType {
+  │   def ubscriber(): () -> disClientType {
+  │   async def ishJob(job( JobMessage): P) -> omise<void> {
+  │   async def Status(status( StatusMessage): Prom) -> se<void> {
+  co
+  │   async def beToStatus(
+  cal(k: (message: StatusMessage) => void
+): Pro) -> se<void> {
+  co
+  │   async def beToComplete(
+  cal(k: (message: CompleteMessage) => void
+): Pro) -> se<void> {
+  co
+  │   async def ToQueue(job: J(bMessage): Prom) -> se<void> {
+  co
+  │   async def (): Promis() -> void> {
+  if (p
+  ├── supabase.ts  (355L)
+  │   async def createJob(repoUrl: string, selectedModel: string) -> Promise<Job | null>
+  │   async def updateJobStatus(jobId: string, status: Job["status"]) -> Promise<boolean>
+  │   async def getJob(jobId: string) -> Promise<Job | null>
+  │   async def getJobWithAnalysis(jobId: string) -> Promise<{
+  job: Job;
+  analysis: AnalysisResult | null;
+} | null>
+  │   async def listJobs(limit = 50) -> Promise<Job[]>
+  │   async def searchCodeEmbeddings(repoId: string, queryEmbedding: number[], limit = 10) -> Promise<CodeEmbedding[]>
+  │   def getDocumentationPublicUrl(storagePath: string) -> string
+  │   async def getDocumentationSignedUrl(storagePath: string, expiresIn = 3600) -> Promise<string | null>
+  │   async def getDocumentationFileContent(storagePath: string) -> Promise<string | null>
+  │   async def listDocumentationFiles(jobId: string) -> Promise<{ name: string; size: number }[]>
+  │   async def listRecursive(prefix: string)
+  │   async def getJobDocumentation(jobId: string) -> Promise<{
+  analysis: AnalysisResult | null;
+  files: Array<{
+    path: string;
+    url: string;
+    size: number;
+  }>;
+} | null>
+  ├── websocket.ts  (147L)
+  │   def sendMessage(ws: WS, message: WSOutgoingMessage) -> void
+  │   def broadcastToJob(jobId: string, message: WSOutgoingMessage) -> void
+  │   def handleStatusUpdate(status: StatusMessage) -> void
+  │   def handleCompleteUpdate(complete: CompleteMessage) -> void
+  │   def subscribeToJob(ws: WS, jobId: string) -> void
+  │   def unsubscribeFromJob(ws: WS, jobId: string) -> void
+  │   def cleanupConnection(ws: WS) -> void
+  │   async def initWebSocketRedisRelay() -> Promise<void>
+  │   def (ws)({
+)
+  │   def (ws, me(sa, : WSMessage) {
+   )
+  │   def s) {
+(  )
+  │   def ionStats(): { tota() -> number; jobSubscriptions: number } {
+  retur
+
+src/routes/
+  ├── cliAuth.ts  (180L)
+  │   def getSessionKey(sessionId: string) -> string
+  │   def isExpired(session: CliAuthSession) -> boolean
+  │   async def saveSession(sessionId: string, session: CliAuthSession) -> Promise<void>
+  │   async def readSession(sessionId: string) -> Promise<CliAuthSession | null>
+  │   async def deleteSession(sessionId: string) -> Promise<void>
+  ├── jobs.ts  (286L)
+  ├── mcp.ts  (202L)
+  │   def buildMcpAnalysisResult(analysis: AnalysisResult)
+  ├── models.ts  (176L)
+  ├── repos.ts  (173L)
+  │   def isValidRepoUrl(url: string) -> boolean
+  │   def extractRepoName(url: string) -> string
