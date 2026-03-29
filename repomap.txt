@@ -1,0 +1,157 @@
+# repomap.txt — cd84c53a-ac50-4fef-acbc-1f8d29cc4dc2
+# AST-compressed repository map (symbols only, no bodies)
+# Generated: 2026-03-29
+# Language: TypeScript
+#
+
+# Stats: 14 files, 64 functions, 0 classes
+#
+
+
+src/
+  ├── index.ts  (81L)
+  │   async def initializeServices()
+
+src/lib/
+  ├── auth.ts  (49L)
+  ├── crypto.ts  (180L)
+  │   def t(rawKey: strin(): string {
+  ) -> f (rawKe
+  │   async def y(params: {
+  u(erId: string;
+  provider: string;
+  label: string;
+  rawKey: string;
+}): Promise<{ i) -> string; keyHint: string } | { error: string }> {
+  const { u
+  │   async def Key(
+  userId: st(,
+  provider: , ng
+): Promise<st) -> ng | null> {
+  if (!ENCR
+  │   async def userId: string)({
+  const { da)
+  │   async def (
+  userId: stri(  keyId: strin,  Promise<bool) -> n> {
+  const { err
+  │   async def  userId: stri(  provider: st, 
+): Promise<bool) -> n> {
+  const { dat
+  ├── mcp.ts  (151L)
+  │   async def cpJobPending(job(d: string): P) -> omise<void> {
+  │   async def cpJobResult(job(d: string, re, lt: unknown): P) -> omise<void> {
+  │   async def cpJobFailed(job(d: string, er, r: string): P) -> omise<void> {
+  │   async def cpJobStatus(job(d: string): P) -> omise<McpJobStatus | null> {
+  ├── models.ts  (253L)
+  │   def mber) || 0,
+( };
+}
+
+/**
+ * Fetch models f) -> om the dat
+  │   async def models loaded`);
+ () -> }
+  } catch (e
+  │   async def async function get() -> delByIdAsync(modelId:
+  │   def xport functi(n getLocalModel) -> (): LLMModel[] {
+  ret
+  │   async def dels.filter((m) =( !m.isLocal);
+}) -> // Validate if a model ID is v
+  │   def xport function getD(faultModel(): LLMModel {
+  ret) -> rn cachedMod
+  │   def ──────────────() -> ────────────
+  │   def ──────────────() -> ────────────
+  │   def Order?: numb(r }): Promise<b) -> olean> {
+  │   def id: model.id,
+ () -> name: m
+  │   async def kens: nu(ber | null;
+  isActive: boolean;
+  sortOrder: number;
+  capabilities: st) -> ing[];
+}>): Promis
+  │   async def defined) db(pdates.capabili, es = updates.capabilities;
+
+  const { error } = await supabaseAdmin
+    .from("available_models")
+    .update(dbUpdates)
+    .eq("model_id", modelId);
+
+  if (error) {
+    console.erro) -> ("Error updating m
+  ├── redis.ts  (160L)
+  │   async def initRedis() -> Promise<void>
+  │   def ublisher(): () -> disClientType {
+  │   def ubscriber(): () -> disClientType {
+  │   async def ishJob(job( JobMessage): P) -> omise<void> {
+  │   async def Status(status( StatusMessage): Prom) -> se<void> {
+  co
+  │   async def beToStatus(
+  cal(k: (message: StatusMessage) => void
+): Pro) -> se<void> {
+  co
+  │   async def beToComplete(
+  cal(k: (message: CompleteMessage) => void
+): Pro) -> se<void> {
+  co
+  │   async def ToQueue(job: J(bMessage): Prom) -> se<void> {
+  co
+  │   async def ctJobToQueue(job: Conf(ictJobMessage): Promise) -> void> {
+  const
+  │   async def  Promise<v() -> d> {
+  if (publ
+  ├── supabase.ts  (383L)
+  │   async def createJob(repoUrl: string, selectedModel: string) -> Promise<Job | null>
+  │   async def updateJobStatus(jobId: string, status: Job["status"]) -> Promise<boolean>
+  │   async def getJob(jobId: string) -> Promise<Job | null>
+  │   async def getJobWithAnalysis(jobId: string) -> Promise<{
+  job: Job;
+  analysis: AnalysisResult | null;
+} | null>
+  │   async def listJobs(limit = 50) -> Promise<Job[]>
+  │   async def searchCodeEmbeddings(repoId: string, queryEmbedding: number[], limit = 10) -> Promise<CodeEmbedding[]>
+  │   def getDocumentationPublicUrl(storagePath: string) -> string
+  │   async def getDocumentationSignedUrl(storagePath: string, expiresIn = 3600) -> Promise<string | null>
+  │   async def getDocumentationFileContent(storagePath: string) -> Promise<string | null>
+  │   async def listDocumentationFiles(jobId: string) -> Promise<{ name: string; size: number }[]>
+  │   async def listRecursive(prefix: string)
+  │   async def getJobDocumentation(jobId: string) -> Promise<{
+  analysis: AnalysisResult | null;
+  files: Array<{
+    path: string;
+    url: string;
+    size: number;
+  }>;
+} | null>
+  ├── websocket.ts  (147L)
+  │   def sendMessage(ws: WS, message: WSOutgoingMessage) -> void
+  │   def broadcastToJob(jobId: string, message: WSOutgoingMessage) -> void
+  │   def handleStatusUpdate(status: StatusMessage) -> void
+  │   def handleCompleteUpdate(complete: CompleteMessage) -> void
+  │   def subscribeToJob(ws: WS, jobId: string) -> void
+  │   def unsubscribeFromJob(ws: WS, jobId: string) -> void
+  │   def cleanupConnection(ws: WS) -> void
+  │   async def initWebSocketRedisRelay() -> Promise<void>
+  │   def (ws)({
+)
+  │   def (ws, me(sa, : WSMessage) {
+   )
+  │   def s) {
+(  )
+  │   def ionStats(): { tota() -> number; jobSubscriptions: number } {
+  retur
+
+src/routes/
+  ├── apiKeys.ts  (136L)
+  ├── cliAuth.ts  (180L)
+  │   def getSessionKey(sessionId: string) -> string
+  │   def isExpired(session: CliAuthSession) -> boolean
+  │   async def saveSession(sessionId: string, session: CliAuthSession) -> Promise<void>
+  │   async def readSession(sessionId: string) -> Promise<CliAuthSession | null>
+  │   async def deleteSession(sessionId: string) -> Promise<void>
+  ├── jobs.ts  (286L)
+  ├── mcp.ts  (202L)
+  │   def buildMcpAnalysisResult(analysis: AnalysisResult)
+  ├── models.ts  (177L)
+  ├── repos.ts  (261L)
+  │   def isValidRepoUrl(url: string) -> boolean
+  │   def extractRepoName(url: string) -> string

@@ -1,0 +1,43 @@
+# cd84c53a-ac50-4fef-acbc-1f8d29cc4dc2
+
+> llms.txt — Machine-readable documentation index
+> Generated: 2026-03-29
+
+## Project Summary
+
+- Architecture: RESTful API (Node.js/TypeScript) with a functional/procedural style, likely using Express.js or a similar framework.
+- Language: TypeScript
+- Type: web, library
+- Files: 14 | Functions: 65 | Classes: 0
+- Stack: See repomap.txt
+
+## Documentation Map
+
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| Behavioral Contract | [AGENTS.md](AGENTS.md) | Rules, commands, boundaries for AI agents |
+| Repository Map | [repomap.txt](repomap.txt) | AST-compressed symbol map of entire repo |
+| Module Doc | [src/ReadMe.LLM](src/ReadMe.LLM) | Signatures + I/O for `src/` |
+| Module Rules | [src/AGENTS.md](src/AGENTS.md) | Module-specific overrides |
+| Module Doc | [src/lib/ReadMe.LLM](src/lib/ReadMe.LLM) | Signatures + I/O for `src/lib/` |
+| Module Rules | [src/lib/AGENTS.md](src/lib/AGENTS.md) | Module-specific overrides |
+| Module Doc | [src/routes/ReadMe.LLM](src/routes/ReadMe.LLM) | Signatures + I/O for `src/routes/` |
+| Module Rules | [src/routes/AGENTS.md](src/routes/AGENTS.md) | Module-specific overrides |
+| SCIP Index | [_codein/scip_index.scip](_codein/scip_index.scip) | Compiler-precision symbol navigation |
+| TreeFrag | [_codein/treefrag.txt](_codein/treefrag.txt) | Hierarchical LOD representation |
+| Knowledge Graph | [_codein/knowledge_graph.json](_codein/knowledge_graph.json) | Enriched dependency graph |
+
+## Key Modules
+
+- `src/`
+
+## Quick Reference
+
+### Entry Points
+- `src/index.ts`
+
+### Build Commands
+```
+npm run dev  # dev
+npm run start  # start
+```
