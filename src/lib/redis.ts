@@ -13,6 +13,7 @@ export const CHANNELS = {
   JOB_STATUS: "code-indexer:status",
   JOB_COMPLETE: "code-indexer:complete",
   MCP_JOBS: "code-indexer:mcp-jobs",
+  CONFLICT_JOBS: "code-indexer:conflict-jobs",
 } as const;
 
 // Initialize Redis connection
@@ -62,6 +63,14 @@ export interface JobMessage {
   repo_url: string;
   selected_model: string;
   github_token?: string | null;
+  timestamp: string;
+}
+
+export interface ConflictJobMessage {
+  job_id: string;
+  repo_url: string;
+  branches: string[];
+  selected_model: string;
   timestamp: string;
 }
 
@@ -129,6 +138,13 @@ export async function pushJobToQueue(job: JobMessage): Promise<void> {
   const publisher = getPublisher();
   await publisher.lPush(CHANNELS.JOB_QUEUE, JSON.stringify(job));
   console.log(`📤 Pushed job ${job.job_id} to queue list`);
+}
+
+// Add conflict analysis job to Redis queue
+export async function pushConflictJobToQueue(job: ConflictJobMessage): Promise<void> {
+  const publisher = getPublisher();
+  await publisher.lPush(CHANNELS.CONFLICT_JOBS, JSON.stringify(job));
+  console.log(`🔀 Pushed conflict job ${job.job_id} to queue list`);
 }
 
 // Graceful shutdown

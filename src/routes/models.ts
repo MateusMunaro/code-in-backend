@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import {
-  AVAILABLE_MODELS,
-  getModelById,
+  getAvailableModels,
+  getModelByIdAsync,
   getModelsByProvider,
   getLocalModels,
   getCloudModels,
@@ -9,12 +9,13 @@ import {
 } from "../lib/models";
 
 export const modelsRoutes = new Elysia({ prefix: "/models" })
-  // Get all available models
+  // Get all available models (from DB with fallback)
   .get("/", async () => {
+    const models = await getAvailableModels();
     return {
       success: true,
-      data: AVAILABLE_MODELS,
-      count: AVAILABLE_MODELS.length,
+      data: models,
+      count: models.length,
       default: getDefaultModel().id,
     };
   })
@@ -22,9 +23,9 @@ export const modelsRoutes = new Elysia({ prefix: "/models" })
   // Get models grouped by provider
   .get("/grouped", async () => {
     const grouped = {
+      google: getModelsByProvider("google"),
       openai: getModelsByProvider("openai"),
       anthropic: getModelsByProvider("anthropic"),
-      google: getModelsByProvider("google"),
       ollama: getModelsByProvider("ollama"),
     };
 
@@ -60,7 +61,7 @@ export const modelsRoutes = new Elysia({ prefix: "/models" })
     "/:modelId",
     async ({ params, set }) => {
       const { modelId } = params;
-      const model = getModelById(modelId);
+      const model = await getModelByIdAsync(modelId);
 
       if (!model) {
         set.status = 404;
@@ -87,7 +88,7 @@ export const modelsRoutes = new Elysia({ prefix: "/models" })
     "/:modelId/status",
     async ({ params, set }) => {
       const { modelId } = params;
-      const model = getModelById(modelId);
+      const model = await getModelByIdAsync(modelId);
 
       if (!model) {
         set.status = 404;

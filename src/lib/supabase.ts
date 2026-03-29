@@ -78,6 +78,34 @@ export interface AnalysisResult {
   created_at: string;
 }
 
+export interface AvailableModel {
+  id: string;
+  model_id: string;
+  name: string;
+  provider: string;
+  description: string | null;
+  max_tokens: number;
+  cost_per_1k_tokens: number | null;
+  is_local: boolean;
+  capabilities: string[];
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserApiKey {
+  id: string;
+  user_id: string;
+  provider: string;
+  label: string;
+  key_hint: string;
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Helper functions
 export async function createJob(
   repoUrl: string,

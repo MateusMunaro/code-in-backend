@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { createJob, updateJobStatus, getJob } from "../lib/supabase";
-import { publishJob, pushJobToQueue } from "../lib/redis";
+import { publishJob, pushJobToQueue, pushConflictJobToQueue } from "../lib/redis";
 import { isValidModel, getDefaultModel } from "../lib/models";
 import { authPlugin } from "../lib/auth";
 
@@ -97,6 +97,94 @@ export const reposRoutes = new Elysia({ prefix: "/repos" })
         repo_url: t.String({ minLength: 1 }),
         model_id: t.Optional(t.String()),
         github_token: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  // Submit a multi-branch conflict analysis
+  .post(
+    "/conflict-analysis",
+    async ({ body, userId, set }) => {
+      const { repo_url, branches, model_id } = body;
+
+      // Validate URL
+      if (!isValidRepoUrl(repo_url)) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "Invalid repository URL. Supported: GitHub, GitLab, Bitbucket",
+        };
+      }
+
+      // Validate branches
+      if (!branches || branches.length < 2) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "At least 2 branches are required for conflict analysis",
+        };
+      }
+
+      if (branches.length > 10) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "Maximum 10 branches allowed per analysis",
+        };
+      }
+
+      const selectedModel = model_id && isValidModel(model_id) ? model_id : getDefaultModel().id;
+
+      // Create job in Supabase
+      const job = await createJob(repo_url, selectedModel, userId!);
+      if (!job) {
+        set.status = 500;
+        return {
+          success: false,
+          error: "Failed to create job",
+        };
+      }
+
+      // Update status to processing
+      await updateJobStatus(job.id, "processing");
+
+      // Push to conflict analysis queue
+      try {
+        await pushConflictJobToQueue({
+          job_id: job.id,
+          repo_url: repo_url,
+          branches: branches,
+          selected_model: selectedModel,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Failed to push conflict job to Redis:", error);
+        await updateJobStatus(job.id, "failed", undefined, "Failed to queue conflict analysis job");
+        set.status = 500;
+        return {
+          success: false,
+          error: "Failed to queue conflict analysis job",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          job_id: job.id,
+          repo_url: repo_url,
+          repo_name: extractRepoName(repo_url),
+          branches: branches,
+          selected_model: selectedModel,
+          status: "processing",
+          message: "Conflict analysis queued for processing",
+        },
+      };
+    },
+    {
+      body: t.Object({
+        repo_url: t.String({ minLength: 1 }),
+        branches: t.Array(t.String({ minLength: 1 })),
+        model_id: t.Optional(t.String()),
       }),
     }
   )

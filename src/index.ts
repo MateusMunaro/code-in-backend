@@ -7,6 +7,7 @@ import { jobsRoutes } from "./routes/jobs";
 import { modelsRoutes } from "./routes/models";
 import { mcpRoutes } from "./routes/mcp";
 import { cliAuthRoutes } from "./routes/cliAuth";
+import { apiKeysRoutes } from "./routes/apiKeys";
 
 
 // Initialize services
@@ -38,6 +39,7 @@ const app = new Elysia()
   .use(reposRoutes)   // POST /repos, POST /repos/:jobId/retry
   .use(jobsRoutes)    // GET|PATCH|DELETE /jobs, GET /jobs/:jobId/...
   .use(mcpRoutes)     // POST /api/mcp/analyze, GET /api/mcp/status/:jobId
+  .use(apiKeysRoutes)  // GET|POST|DELETE /api-keys
   // ─────────────────────────────────────────────────────────────────────────
   // Public routes — no auth required
   // ─────────────────────────────────────────────────────────────────────────
