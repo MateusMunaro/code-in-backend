@@ -1,0 +1,168 @@
+# ReadMe.LLM — src/lib/
+
+> Machine-readable module documentation for `d84415fd-b97f-44d6-af30-eb8a2e5652f3`
+> Generated: 2026-03-13
+
+---
+
+## Module Summary
+
+- **Files:** 6
+- **Functions:** 43
+- **Classes:** 0
+- **Language:** TypeScript
+
+### Files
+
+- `auth.ts`
+- `mcp.ts`
+- `models.ts`
+- `redis.ts`
+- `supabase.ts`
+- `websocket.ts`
+
+---
+
+## Signatures
+
+### `mcp.ts`
+
+| Function | Params | Returns | Async |
+|----------|--------|---------|-------|
+| `cpJobPending(job` | `d: string): P` | `omise<void> {` | ✓ |
+| `cpJobResult(job` | `d: string, re, lt: unknown): P` | `omise<void> {` | ✓ |
+| `cpJobFailed(job` | `d: string, er, r: string): P` | `omise<void> {` | ✓ |
+| `cpJobStatus(job` | `d: string): P` | `omise<McpJobStatus | null> {` | ✓ |
+
+### `models.ts`
+
+| Function | Params | Returns | Async |
+|----------|--------|---------|-------|
+| `elId: string` | `: LLMModel | un` | `efined {
+  return AVAI` |  |
+| `der(provider: LLMMo` | `el["provider"]): LLMModel[] {
+` | `return AVAI` |  |
+| `: LLMModel[] {` | `` | `return AVAI` |  |
+| `: LLMModel[] {` | `` | `return AVAI` |  |
+| `elId: string` | `: boolean {
+  r` | `turn AVAI` |  |
+| `): LLMModel {
+ ` | `` | `eturn AVAI` |  |
+
+### `redis.ts`
+
+| Function | Params | Returns | Async |
+|----------|--------|---------|-------|
+| `initRedis` | `` | `Promise<void>` | ✓ |
+| `ublisher(): ` | `` | `disClientType {` |  |
+| `ubscriber(): ` | `` | `disClientType {` |  |
+| `ishJob(job` | ` JobMessage): P` | `omise<void> {` | ✓ |
+| `Status(status` | ` StatusMessage): Prom` | `se<void> {
+  co` | ✓ |
+| `beToStatus(
+  cal` | `k: (message: StatusMessage) => void
+): Pro` | `se<void> {
+  co` | ✓ |
+| `beToComplete(
+  cal` | `k: (message: CompleteMessage) => void
+): Pro` | `se<void> {
+  co` | ✓ |
+| `ToQueue(job: J` | `bMessage): Prom` | `se<void> {
+  co` | ✓ |
+| `(): Promis` | `` | `void> {
+  if (p` | ✓ |
+
+### `supabase.ts`
+
+| Function | Params | Returns | Async |
+|----------|--------|---------|-------|
+| `createJob` | `repoUrl: string, selectedModel: string` | `Promise<Job | null>` | ✓ |
+| `updateJobStatus` | `jobId: string, status: Job["status"]` | `Promise<boolean>` | ✓ |
+| `getJob` | `jobId: string` | `Promise<Job | null>` | ✓ |
+| `getJobWithAnalysis` | `jobId: string` | `Promise<{
+  job: Job;
+  analysis: AnalysisResult | null;
+} | null>` | ✓ |
+| `listJobs` | `limit = 50` | `Promise<Job[]>` | ✓ |
+| `searchCodeEmbeddings` | `repoId: string, queryEmbedding: number[], limit = 10` | `Promise<CodeEmbedding[]>` | ✓ |
+| `getDocumentationPublicUrl` | `storagePath: string` | `string` |  |
+| `getDocumentationSignedUrl` | `storagePath: string, expiresIn = 3600` | `Promise<string | null>` | ✓ |
+| `getDocumentationFileContent` | `storagePath: string` | `Promise<string | null>` | ✓ |
+| `listDocumentationFiles` | `jobId: string` | `Promise<{ name: string; size: number }[]>` | ✓ |
+| `listRecursive` | `prefix: string` | `None` | ✓ |
+| `getJobDocumentation` | `jobId: string` | `Promise<{
+  analysis: AnalysisResult | null;
+  files: Array<{
+    path: string;
+    url: string;
+    size: number;
+  }>;
+} | null>` | ✓ |
+
+### `websocket.ts`
+
+| Function | Params | Returns | Async |
+|----------|--------|---------|-------|
+| `sendMessage` | `ws: WS, message: WSOutgoingMessage` | `void` |  |
+| `broadcastToJob` | `jobId: string, message: WSOutgoingMessage` | `void` |  |
+| `handleStatusUpdate` | `status: StatusMessage` | `void` |  |
+| `handleCompleteUpdate` | `complete: CompleteMessage` | `void` |  |
+| `subscribeToJob` | `ws: WS, jobId: string` | `void` |  |
+| `unsubscribeFromJob` | `ws: WS, jobId: string` | `void` |  |
+| `cleanupConnection` | `ws: WS` | `void` |  |
+| `initWebSocketRedisRelay` | `` | `Promise<void>` | ✓ |
+| `(ws)` | `{
+` | `None` |  |
+| `(ws, me` | `sa, : WSMessage) {
+   ` | `None` |  |
+| `s) {
+` | `  ` | `None` |  |
+| `ionStats(): { tota` | `` | `number; jobSubscriptions: number } {
+  retur` |  |
+
+---
+
+## Dependencies
+
+### Imported by:
+- `src/routes/jobs.ts` → `auth.ts`
+- `src/routes/mcp.ts` → `auth.ts`
+- `src/routes/repos.ts` → `auth.ts`
+- `src/routes/mcp.ts` → `mcp.ts`
+- `src/routes/jobs.ts` → `models.ts`
+- `src/routes/mcp.ts` → `models.ts`
+- `src/routes/models.ts` → `models.ts`
+- `src/routes/repos.ts` → `models.ts`
+- `src/index.ts` → `redis.ts`
+- `src/routes/cliAuth.ts` → `redis.ts`
+- `src/routes/mcp.ts` → `redis.ts`
+- `src/routes/repos.ts` → `redis.ts`
+- `src/routes/jobs.ts` → `supabase.ts`
+- `src/routes/mcp.ts` → `supabase.ts`
+- `src/routes/repos.ts` → `supabase.ts`
+- `src/index.ts` → `websocket.ts`
+
+---
+
+## Module Structure
+
+```mermaid
+flowchart TB
+    subgraph src_lib["src/lib/"]
+        src_lib_auth_ts["auth.ts"]
+        src_lib_websocket_ts["websocket.ts (12F)"]
+        src_lib_models_ts["models.ts (6F)"]
+        src_lib_mcp_ts["mcp.ts (4F)"]
+        src_lib_redis_ts["redis.ts (9F)"]
+        src_lib_supabase_ts["supabase.ts (12F)"]
+        src_lib_auth_ts --> src_lib_supabase_ts
+        src_lib_websocket_ts --> src_lib_redis_ts
+        src_lib_websocket_ts --> src_lib_redis_ts
+        src_lib_mcp_ts --> src_lib_redis_ts
+    end
+```
+
+---
+
+
+*Generated by Code-In Agent — 2026-03-13*

@@ -1,0 +1,43 @@
+# d84415fd-b97f-44d6-af30-eb8a2e5652f3
+
+> llms.txt — Machine-readable documentation index
+> Generated: 2026-03-13
+
+## Project Summary
+
+- Architecture: Monolithic application, likely a simple backend service. Given the presence of `src/index.ts`, `src/lib/auth.ts`, and `src/lib/websocket.ts`, it's plausible this is a single process handling authentication and potentially real-time communication.
+- Language: TypeScript
+- Type: web, library
+- Files: 12 | Functions: 52 | Classes: 0
+- Stack: Main Dependencies: @elysiajs/cors, @supabase/supabase-js, elysia, redis, zod, Dev Dependencies: @types/bun, Scripts: dev, start
+
+## Documentation Map
+
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| Behavioral Contract | [AGENTS.md](AGENTS.md) | Rules, commands, boundaries for AI agents |
+| Repository Map | [repomap.txt](repomap.txt) | AST-compressed symbol map of entire repo |
+| Module Doc | [src/ReadMe.LLM](src/ReadMe.LLM) | Signatures + I/O for `src/` |
+| Module Rules | [src/AGENTS.md](src/AGENTS.md) | Module-specific overrides |
+| Module Doc | [src/lib/ReadMe.LLM](src/lib/ReadMe.LLM) | Signatures + I/O for `src/lib/` |
+| Module Rules | [src/lib/AGENTS.md](src/lib/AGENTS.md) | Module-specific overrides |
+| Module Doc | [src/routes/ReadMe.LLM](src/routes/ReadMe.LLM) | Signatures + I/O for `src/routes/` |
+| Module Rules | [src/routes/AGENTS.md](src/routes/AGENTS.md) | Module-specific overrides |
+| SCIP Index | [_codein/scip_index.scip](_codein/scip_index.scip) | Compiler-precision symbol navigation |
+| TreeFrag | [_codein/treefrag.txt](_codein/treefrag.txt) | Hierarchical LOD representation |
+| Knowledge Graph | [_codein/knowledge_graph.json](_codein/knowledge_graph.json) | Enriched dependency graph |
+
+## Key Modules
+
+- `src/`
+
+## Quick Reference
+
+### Entry Points
+- `src/index.ts`
+
+### Build Commands
+```
+npm run dev  # dev
+npm run start  # start
+```
